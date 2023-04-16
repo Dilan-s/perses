@@ -41,3 +41,11 @@ perses_result*
 t.c.*.orig
 
 perses-fuzzer
+
+antlropt/antlropt.iml
+antlrrdc/antlrrdc.iml
+perses.iml
+test/test.iml
+test_data/java_programs/java_programs.iml
+test_data/test_data.iml
+version/version.iml
