@@ -75,7 +75,6 @@ BOOL_LITERAL: TRUE |
 fragment TRUE: 'true';
 fragment FALSE: 'false';
 
-WS: [ \t\n\r]+ -> skip ;
 PARAM_NAME: 'p_' ('A'..'Z' |
 	'a'..'z' |
 	'_' |
@@ -133,28 +132,29 @@ fragment ESCAPE_FORMFEED : 'f' ;
 fragment ESCAPE_CARRIAGERETURN : 'r' ;
 fragment ESCAPE_BACKSLASH : '\\' ;
 
+WS: [ \t\n\r]+ -> skip ;
 
 ERROR: .;
 
 translation_unit: program;
 program: method* main method*;
 
-main: METHOD MAIN LBRACKET RBRACKET (RETURNS LBRACKET RBRACKET)? LCURLY stat* RCURLY;
+main: METHOD MAIN LBRACKET RBRACKET RETURNS LBRACKET RBRACKET LCURLY stat* RCURLY;
 
 method: METHOD METHOD_NAME LBRACKET paramList? RBRACKET (RETURNS LBRACKET returnList? RBRACKET)? LCURLY stat* RCURLY;
 
-type: baseType |
+dafnyType: baseType |
 	collectionType (LANGLE typeList RANGLE)?;
 
 paramList: paramArg (COMMA paramArg)*;
 returnList: returnArg (COMMA returnArg)*;
 
-paramArg: PARAM_NAME (COLON type)?;
-returnArg: RETURN_NAME (COLON type)?;
+paramArg: PARAM_NAME (COLON dafnyType)?;
+returnArg: RETURN_NAME (COLON dafnyType)?;
 
 
 
-typeList: type (COMMA type)*;
+typeList: dafnyType (COMMA dafnyType)*;
 
 baseType: INT |
 	CHAR |
@@ -176,7 +176,8 @@ ifElseStat: IF expr LCURLY stat* RCURLY (ELSE LCURLY stat* RCURLY)?;
 
 assignStat: VAR? variableList COLON EQUAL exprList SEMICOLON;
 
-variableList: variable (COLON type)? (COMMA variable (COLON type)?)*;
+variableList: variableArg (COMMA variableArg)*;
+variableArg: variable COLON dafnyType;
 
 exprList: expr (COMMA expr)*;
 
@@ -206,7 +207,7 @@ intLiteral: INT_LITERAL;
 charLiteral: CHAR_LITERAL;
 boolLiteral: BOOL_LITERAL;
 realLiteral: REAL_LITERAL;
-arrayLiteral: NEW type LSQUARE RSQUARE LSQUARE exprList? RSQUARE;
+arrayLiteral: NEW dafnyType LSQUARE RSQUARE LSQUARE exprList? RSQUARE;
 setLiteral: LCURLY exprList? RCURLY;
 seqLiteral: LSQUARE exprList? RSQUARE;
 multisetLiteral: MULTISET (LBRACKET expr RBRACKET |
@@ -243,7 +244,7 @@ op7: MULT |
 	MOD;
 
 unaryOperator: MINUS |
-	EXCLAMATION | NOT;
+	NOT;
 
 callExpr: METHOD_NAME LBRACKET exprList? RBRACKET;
 
