@@ -170,7 +170,7 @@ stat: printStat | ifElseStat | returnStat | assignStat;
 
 printStat: PRINT exprList SEMICOLON;
 
-returnStat: RETURN exprList SEMICOLON;
+returnStat: RETURN exprList? SEMICOLON;
 
 ifElseStat: IF expr LCURLY stat* RCURLY (ELSE LCURLY stat* RCURLY)?;
 
