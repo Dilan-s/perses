@@ -19,7 +19,11 @@ ARRAY: 'array';
 SEQ: 'seq';
 SET: 'set';
 MULTISET: 'multiset';
+MAP: 'map';
 
+KEYS: 'Keys';
+VALUES: 'Values';
+LENGTH: 'Length';
 VAR: 'var';
 
 LCURLY: '{';
@@ -100,6 +104,8 @@ INT_LITERAL: DIGIT+ |
 REAL_LITERAL: DIGIT+ DECIMAL DIGIT+;
 fragment DECIMAL: '.';
 
+DOT: DECIMAL;
+
 fragment DIGIT: '0'..'9' ;
 fragment BIN_DIGIT: '0' |
 	'1' ;
@@ -164,7 +170,8 @@ baseType: INT |
 collectionType: ARRAY |
 	SEQ |
 	SET |
-	MULTISET;
+	MULTISET |
+	MAP;
 
 stat: printStat | ifElseStat | returnStat | assignStat;
 
@@ -188,10 +195,11 @@ expr: literal |
 	callExpr |
 	ifElseExpr |
 	expr indexExpr |
-	expr reassignSeq |
+	expr update |
 	expr subsequence |
 	variable |
-	LBRACKET expr RBRACKET;
+	LBRACKET expr RBRACKET |
+	expr DOT (KEYS | VALUES | LENGTH);
 
 literal: intLiteral |
 	charLiteral |
@@ -201,7 +209,8 @@ literal: intLiteral |
 	setLiteral |
 	seqLiteral |
 	multisetLiteral |
-	stringLiteral;
+	stringLiteral |
+	mapLiteral;
 
 intLiteral: INT_LITERAL;
 charLiteral: CHAR_LITERAL;
@@ -213,6 +222,7 @@ seqLiteral: LSQUARE exprList? RSQUARE;
 multisetLiteral: MULTISET (LBRACKET expr RBRACKET |
 	LCURLY exprList? RCURLY);
 stringLiteral: STRING_LITERAL;
+mapLiteral: MAP LSQUARE (expr COLON EQUAL expr (COMMA expr COLON EQUAL expr)*)? RSQUARE;
 
 binaryOperator: op1 |
 	op2 |
@@ -252,7 +262,7 @@ ifElseExpr: IF expr THEN expr ELSE expr;
 
 indexExpr: LSQUARE expr RSQUARE;
 
-reassignSeq: LSQUARE expr COLON EQUAL expr RSQUARE;
+update: LSQUARE expr COLON EQUAL expr RSQUARE;
 
 subsequence: LSQUARE expr? SPREAD expr? RSQUARE;
 
