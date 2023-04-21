@@ -89,9 +89,10 @@ for file in persesOutputs/*; do
 	if [ $? -ne 0 ]
 	then
 	    echo "diff found between files $file and $file2"
+	    rm -rf persesOutputs || true
 	    exit 0
 	fi
     done
 done
-
+rm -rf persesOutputs || true
 exit 1
