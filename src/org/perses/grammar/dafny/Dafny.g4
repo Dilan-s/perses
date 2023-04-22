@@ -150,7 +150,7 @@ main: METHOD MAIN LBRACKET RBRACKET RETURNS LBRACKET RBRACKET LCURLY stat* RCURL
 method: METHOD METHOD_NAME LBRACKET paramList? RBRACKET (RETURNS LBRACKET returnList? RBRACKET)? LCURLY stat* RCURLY;
 
 dafnyType: baseType |
-	collectionType (LANGLE typeList RANGLE)?;
+	collectionType (LANGLE typeList RANGLE)? | LBRACKET typeList RBRACKET;
 
 paramList: paramArg (COMMA paramArg)*;
 returnList: returnArg (COMMA returnArg)*;
@@ -199,7 +199,7 @@ expr: literal |
 	expr subsequence |
 	variable |
 	LBRACKET expr RBRACKET |
-	expr DOT (KEYS | VALUES | LENGTH);
+	expr DOT (KEYS | VALUES | LENGTH | intLiteral);
 
 literal: intLiteral |
 	charLiteral |
@@ -210,7 +210,8 @@ literal: intLiteral |
 	seqLiteral |
 	multisetLiteral |
 	stringLiteral |
-	mapLiteral;
+	mapLiteral |
+	tupleLiteral;
 
 intLiteral: INT_LITERAL;
 charLiteral: CHAR_LITERAL;
@@ -222,6 +223,7 @@ seqLiteral: LSQUARE exprList? RSQUARE;
 multisetLiteral: MULTISET (LBRACKET expr RBRACKET | LCURLY exprList? RCURLY);
 stringLiteral: STRING_LITERAL;
 mapLiteral: MAP LSQUARE (expr COLON EQUAL expr (COMMA expr COLON EQUAL expr)*)? RSQUARE;
+tupleLiteral: LBRACKET exprList RBRACKET;
 
 binaryOperator: op1 |
 	op2 |
