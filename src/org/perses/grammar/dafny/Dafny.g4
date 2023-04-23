@@ -6,6 +6,10 @@ MAIN: 'Main';
 LBRACKET: '(';
 RBRACKET: ')';
 
+ASSERT: 'assert';
+REQUIRES: 'requires';
+ENSURES: 'ensures';
+
 RETURNS: 'returns';
 RETURN: 'return';
 
@@ -147,7 +151,7 @@ program: method* main method*;
 
 main: METHOD MAIN LBRACKET RBRACKET RETURNS LBRACKET RBRACKET LCURLY stat* RCURLY;
 
-method: METHOD METHOD_NAME LBRACKET paramList? RBRACKET (RETURNS LBRACKET returnList? RBRACKET)? LCURLY stat* RCURLY;
+method: METHOD METHOD_NAME LBRACKET paramList? RBRACKET (RETURNS LBRACKET returnList? RBRACKET)? requires* ensures* LCURLY stat* RCURLY;
 
 dafnyType: baseType |
 	collectionType (LANGLE typeList RANGLE)? | LBRACKET typeList RBRACKET;
@@ -157,8 +161,6 @@ returnList: returnArg (COMMA returnArg)*;
 
 paramArg: PARAM_NAME (COLON dafnyType)?;
 returnArg: RETURN_NAME (COLON dafnyType)?;
-
-
 
 typeList: dafnyType (COMMA dafnyType)*;
 
@@ -173,9 +175,13 @@ collectionType: ARRAY |
 	MULTISET |
 	MAP;
 
-stat: printStat | ifElseStat | returnStat | assignStat;
+stat: printStat | ifElseStat | returnStat | assignStat | assertStat;
 
 printStat: PRINT exprList SEMICOLON;
+
+assertStat: ASSERT expr SEMICOLON;
+ensures: ENSURES expr SEMICOLON;
+requires: REQUIRES expr SEMICOLON;
 
 returnStat: RETURN exprList? SEMICOLON;
 
@@ -188,7 +194,8 @@ variableArg: variable (COLON dafnyType)?;
 
 exprList: expr (COMMA expr)*;
 
-expr: literal |
+expr: LBRACKET expr RBRACKET |
+	literal |
 	expr binaryOperator expr |
 	unaryOperator expr |
 	BAR expr BAR |
@@ -198,7 +205,6 @@ expr: literal |
 	expr update |
 	expr subsequence |
 	variable |
-	LBRACKET expr RBRACKET |
 	expr DOT (KEYS | VALUES | LENGTH | intLiteral);
 
 literal: intLiteral |
@@ -268,4 +274,4 @@ update: LSQUARE expr COLON EQUAL expr RSQUARE;
 subsequence: LSQUARE expr? SPREAD expr? RSQUARE;
 
 variable: (PARAM_NAME |
-  VARIABLE_NAME) (LSQUARE expr RSQUARE)?;
+  VARIABLE_NAME | RETURN_NAME) (LSQUARE expr RSQUARE)?;
