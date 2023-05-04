@@ -13,6 +13,9 @@ ENSURES: 'ensures';
 RETURNS: 'returns';
 RETURN: 'return';
 
+MATCH: 'match';
+CASE: 'case';
+
 INT: 'int';
 CHAR: 'char';
 REAL: 'real';
@@ -28,8 +31,9 @@ MAP: 'map';
 KEYS: 'Keys';
 VALUES: 'Values';
 LENGTH: 'Length';
-VAR: 'var';
+FLOOR: 'Floor';
 
+VAR: 'var';
 LCURLY: '{';
 RCURLY: '}';
 EQUAL: '=';
@@ -99,6 +103,8 @@ METHOD_NAME: 'a'..'z' ('A'..'Z' |
 	'a'..'z' |
 	'_' |
 	DIGIT)*;
+
+UNDERSCORE: '_';
 
 
 INT_LITERAL: DIGIT+ |
@@ -175,15 +181,17 @@ collectionType: ARRAY |
 	MULTISET |
 	MAP;
 
-stat: printStat | ifElseStat | returnStat | assignStat | assertStat;
+stat: printStat | ifElseStat | returnStat | assignStat | assertStat | matchStat;
 
 printStat: PRINT exprList SEMICOLON;
 
 assertStat: ASSERT expr SEMICOLON;
 ensures: ENSURES expr SEMICOLON;
 requires: REQUIRES expr SEMICOLON;
-
 returnStat: RETURN exprList? SEMICOLON;
+matchStat: MATCH expr LCURLY matchStatCase+ RCURLY;
+
+matchStatCase: CASE (expr | UNDERSCORE) EQUAL RANGLE LCURLY stat* RCURLY;
 
 ifElseStat: IF expr LCURLY stat* RCURLY (ELSE LCURLY stat* RCURLY)?;
 
@@ -205,7 +213,12 @@ expr: LBRACKET expr RBRACKET |
 	expr update |
 	expr subsequence |
 	variable |
-	expr DOT (KEYS | VALUES | LENGTH | intLiteral);
+	matchExpr |
+	expr DOT (KEYS | VALUES | LENGTH | FLOOR | intLiteral);
+
+matchExpr: MATCH expr LCURLY matchExprCase+ RCURLY;
+
+matchExprCase: CASE (expr | UNDERSCORE) EQUAL RANGLE expr ;
 
 literal: intLiteral |
 	charLiteral |
