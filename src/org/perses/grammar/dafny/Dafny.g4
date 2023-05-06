@@ -16,6 +16,9 @@ RETURN: 'return';
 MATCH: 'match';
 CASE: 'case';
 
+WHILE: 'while';
+DECREASES: 'decreases';
+
 INT: 'int';
 CHAR: 'char';
 REAL: 'real';
@@ -181,7 +184,7 @@ collectionType: ARRAY |
 	MULTISET |
 	MAP;
 
-stat: printStat | ifElseStat | returnStat | assignStat | assertStat | matchStat;
+stat: assignStat | assertStat | printStat | ifElseStat | returnStat | matchStat | whileStat;
 
 printStat: PRINT exprList SEMICOLON;
 
@@ -190,6 +193,9 @@ ensures: ENSURES expr SEMICOLON;
 requires: REQUIRES expr SEMICOLON;
 returnStat: RETURN exprList? SEMICOLON;
 matchStat: MATCH expr LCURLY matchStatCase+ RCURLY;
+whileStat: WHILE expr decreasesClause? LCURLY stat* RCURLY;
+
+decreasesClause: DECREASES expr SEMICOLON;
 
 matchStatCase: CASE (expr | UNDERSCORE) EQUAL RANGLE LCURLY stat* RCURLY;
 
@@ -198,12 +204,13 @@ ifElseStat: IF expr LCURLY stat* RCURLY (ELSE LCURLY stat* RCURLY)?;
 assignStat: VAR? variableList COLON EQUAL exprList SEMICOLON;
 
 variableList: variableArg (COMMA variableArg)*;
-variableArg: variable (COLON dafnyType)?;
-
-exprList: expr (COMMA expr)*;
+variableArg: expr (COLON dafnyType)?;
 
 expr: LBRACKET expr RBRACKET |
 	literal |
+	variable |
+	expr DOT (KEYS | VALUES | LENGTH | FLOOR | intLiteral) |
+	expr (DOT intLiteral)+ |
 	expr binaryOperator expr |
 	unaryOperator expr |
 	BAR expr BAR |
@@ -212,14 +219,15 @@ expr: LBRACKET expr RBRACKET |
 	expr indexExpr |
 	expr update |
 	expr subsequence |
-	variable |
-	matchExpr |
-	expr DOT (KEYS | VALUES | LENGTH | FLOOR | intLiteral);
+	matchExpr;
+
+exprList: expr (COMMA expr)*;
+
+
 
 matchExpr: MATCH expr LCURLY matchExprCase+ RCURLY;
 
 matchExprCase: CASE (expr | UNDERSCORE) EQUAL RANGLE expr ;
-
 literal: intLiteral |
 	charLiteral |
 	boolLiteral |
@@ -286,5 +294,4 @@ update: LSQUARE expr COLON EQUAL expr RSQUARE;
 
 subsequence: LSQUARE expr? SPREAD expr? RSQUARE;
 
-variable: (PARAM_NAME |
-  VARIABLE_NAME | RETURN_NAME) (LSQUARE expr RSQUARE)?;
+variable: PARAM_NAME | VARIABLE_NAME | RETURN_NAME;
