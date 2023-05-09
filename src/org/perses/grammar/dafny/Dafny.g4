@@ -19,6 +19,14 @@ CASE: 'case';
 WHILE: 'while';
 DECREASES: 'decreases';
 
+BREAK: 'break';
+CONTINUE: 'continue';
+
+FOR: 'for';
+TO: 'to';
+DOWNTO: 'downto';
+INVARIANT: 'invariant';
+
 INT: 'int';
 CHAR: 'char';
 REAL: 'real';
@@ -184,16 +192,20 @@ collectionType: ARRAY |
 	MULTISET |
 	MAP;
 
-stat: assignStat | assertStat | printStat | ifElseStat | returnStat | matchStat | whileStat;
+stat: assignStat | assertStat | printStat | ifElseStat | returnStat | matchStat | whileStat | forStat | breakStat | continueStat;
 
 printStat: PRINT exprList SEMICOLON;
-
 assertStat: ASSERT expr SEMICOLON;
 ensures: ENSURES expr SEMICOLON;
 requires: REQUIRES expr SEMICOLON;
 returnStat: RETURN exprList? SEMICOLON;
 matchStat: MATCH expr LCURLY matchStatCase+ RCURLY;
 whileStat: WHILE expr decreasesClause? LCURLY stat* RCURLY;
+forStat: FOR variable COLON EQUAL expr (TO | DOWNTO) expr invariantsClause* LCURLY stat* RCURLY;
+breakStat: BREAK SEMICOLON;
+continueStat: CONTINUE SEMICOLON;
+
+invariantsClause: INVARIANT expr;
 
 decreasesClause: DECREASES expr SEMICOLON;
 
