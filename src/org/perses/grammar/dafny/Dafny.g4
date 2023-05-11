@@ -7,6 +7,7 @@ LBRACKET: '(';
 RBRACKET: ')';
 
 ASSERT: 'assert';
+EXPECT: 'expect';
 REQUIRES: 'requires';
 ENSURES: 'ensures';
 
@@ -192,10 +193,11 @@ collectionType: ARRAY |
 	MULTISET |
 	MAP;
 
-stat: assignStat | assertStat | printStat | ifElseStat | returnStat | matchStat | whileStat | forStat | breakStat | continueStat;
+stat: assignStat | assertStat | expectStat | printStat | ifElseStat | returnStat | matchStat | whileStat | forStat | breakStat | continueStat;
 
 printStat: PRINT exprList SEMICOLON;
 assertStat: ASSERT expr SEMICOLON;
+expectStat: EXPECT expr SEMICOLON;
 ensures: ENSURES expr SEMICOLON;
 requires: REQUIRES expr SEMICOLON;
 returnStat: RETURN exprList? SEMICOLON;
