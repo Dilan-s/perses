@@ -1,5 +1,6 @@
 grammar Dafny;
 
+DATATYPE: 'datatype';
 METHOD: 'method';
 MAIN: 'Main';
 
@@ -10,6 +11,7 @@ ASSERT: 'assert';
 EXPECT: 'expect';
 REQUIRES: 'requires';
 ENSURES: 'ensures';
+MODIFIES: 'modifies';
 
 RETURNS: 'returns';
 RETURN: 'return';
@@ -103,14 +105,30 @@ PARAM_NAME: 'p_' ('A'..'Z' |
 	'a'..'z' |
 	'_' |
 	DIGIT)+;
+
 VARIABLE_NAME: 'v_' ('A'..'Z' |
 	'a'..'z' |
 	'_' |
 	DIGIT)+;
+
 RETURN_NAME: 'ret_' ('A'..'Z' |
 	'a'..'z' |
 	'_' |
 	DIGIT)+;
+
+DATATYPE_NAME: 'DT_'
+  ('A'..'Z' | 'a'..'z' | DIGIT)*;
+DATATYPE_RULE_NAME: 'DT_'
+  ('A'..'Z' | 'a'..'z' | DIGIT)*
+	'_'
+	('A'..'Z' | 'a'..'z' | DIGIT)*;
+DATATYPE_RULE_FIELD_NAME: 'DT_'
+  ('A'..'Z' | 'a'..'z' | DIGIT)*
+	'_'
+	('A'..'Z' | 'a'..'z' | DIGIT)*
+	'_'
+	('A'..'Z' | 'a'..'z' | DIGIT)*;
+
 METHOD_NAME: 'a'..'z' ('A'..'Z' |
 	'a'..'z' |
 	'_' |
@@ -165,14 +183,20 @@ WS: [ \t\n\r]+ -> skip ;
 ERROR: .;
 
 translation_unit: program;
-program: method* main method*;
+program: datatype* method* main;
+
+datatype: DATATYPE DATATYPE_NAME EQUAL datatypeRuleList;
+datatypeRuleList: datatypeRule (BAR datatypeRule)*;
+datatypeRule: DATATYPE_RULE_NAME (LBRACKET datatypeRuleFieldList RBRACKET)?;
+datatypeRuleFieldList: dataTypeField (COMMA dataTypeField)*;
+dataTypeField: DATATYPE_RULE_FIELD_NAME COLON dafnyType;
 
 main: METHOD MAIN LBRACKET RBRACKET RETURNS LBRACKET RBRACKET LCURLY stat* RCURLY;
 
-method: METHOD METHOD_NAME LBRACKET paramList? RBRACKET (RETURNS LBRACKET returnList? RBRACKET)? requires* ensures* LCURLY stat* RCURLY;
+method: METHOD METHOD_NAME LBRACKET paramList? RBRACKET (RETURNS LBRACKET returnList? RBRACKET)? requires* ensures* modifies* LCURLY stat* RCURLY;
 
 dafnyType: baseType |
-	collectionType (LANGLE typeList RANGLE)? | LBRACKET typeList RBRACKET;
+	collectionType (LANGLE typeList RANGLE)? | LBRACKET typeList RBRACKET | DATATYPE_NAME;
 
 paramList: paramArg (COMMA paramArg)*;
 returnList: returnArg (COMMA returnArg)*;
@@ -200,6 +224,7 @@ assertStat: ASSERT expr SEMICOLON;
 expectStat: EXPECT expr SEMICOLON;
 ensures: ENSURES expr SEMICOLON;
 requires: REQUIRES expr SEMICOLON;
+modifies: MODIFIES variableList SEMICOLON;
 returnStat: RETURN exprList? SEMICOLON;
 matchStat: MATCH expr LCURLY matchStatCase+ RCURLY;
 whileStat: WHILE expr decreasesClause? LCURLY stat* RCURLY;
@@ -223,7 +248,7 @@ variableArg: expr (COLON dafnyType)?;
 expr: LBRACKET expr RBRACKET |
 	literal |
 	variable |
-	expr DOT (KEYS | VALUES | LENGTH | FLOOR | intLiteral) |
+	expr DOT (KEYS | VALUES | LENGTH | FLOOR | intLiteral | DATATYPE_RULE_FIELD_NAME) |
 	expr (DOT intLiteral)+ |
 	expr binaryOperator expr |
 	unaryOperator expr |
@@ -233,7 +258,8 @@ expr: LBRACKET expr RBRACKET |
 	expr indexExpr |
 	expr update |
 	expr subsequence |
-	matchExpr;
+	matchExpr |
+	DATATYPE_RULE_NAME (LBRACKET exprList RBRACKET)?;
 
 exprList: expr (COMMA expr)*;
 
