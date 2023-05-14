@@ -227,7 +227,7 @@ requires: REQUIRES expr SEMICOLON;
 modifies: MODIFIES variableList SEMICOLON;
 returnStat: RETURN exprList? SEMICOLON;
 matchStat: MATCH expr LCURLY matchStatCase+ RCURLY;
-whileStat: WHILE expr decreasesClause? LCURLY stat* RCURLY;
+whileStat: WHILE expr decreasesClause? (invariantsClause SEMICOLON)? LCURLY stat* RCURLY;
 forStat: FOR variable COLON EQUAL expr (TO | DOWNTO) expr invariantsClause* LCURLY stat* RCURLY;
 breakStat: BREAK SEMICOLON;
 continueStat: CONTINUE SEMICOLON;
