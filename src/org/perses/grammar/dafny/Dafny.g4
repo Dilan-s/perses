@@ -53,6 +53,8 @@ RCURLY: '}';
 EQUAL: '=';
 BAR: '|';
 
+QUESTION_MARK: '?';
+
 LANGLE: '<';
 RANGLE: '>';
 
@@ -112,6 +114,11 @@ VARIABLE_NAME: 'v_' ('A'..'Z' |
 	DIGIT)+;
 
 RETURN_NAME: 'ret_' ('A'..'Z' |
+	'a'..'z' |
+	'_' |
+	DIGIT)+;
+
+GENERIC_NAME: 'T_' ('A'..'Z' |
 	'a'..'z' |
 	'_' |
 	DIGIT)+;
@@ -185,7 +192,7 @@ ERROR: .;
 translation_unit: program;
 program: datatype* method* main;
 
-datatype: DATATYPE DATATYPE_NAME EQUAL datatypeRuleList;
+datatype: DATATYPE DATATYPE_NAME (LANGLE typeList RANGLE)? EQUAL datatypeRuleList;
 datatypeRuleList: datatypeRule (BAR datatypeRule)*;
 datatypeRule: DATATYPE_RULE_NAME (LBRACKET datatypeRuleFieldList RBRACKET)?;
 datatypeRuleFieldList: dataTypeField (COMMA dataTypeField)*;
@@ -196,7 +203,7 @@ main: METHOD MAIN LBRACKET RBRACKET RETURNS LBRACKET RBRACKET LCURLY stat* RCURL
 method: METHOD METHOD_NAME LBRACKET paramList? RBRACKET (RETURNS LBRACKET returnList? RBRACKET)? requires* ensures* modifies* LCURLY stat* RCURLY;
 
 dafnyType: baseType |
-	collectionType (LANGLE typeList RANGLE)? | LBRACKET typeList RBRACKET | DATATYPE_NAME;
+	collectionType (LANGLE typeList RANGLE)? | LBRACKET typeList RBRACKET | DATATYPE_NAME (LANGLE typeList RANGLE)? | GENERIC_NAME ;
 
 paramList: paramArg (COMMA paramArg)*;
 returnList: returnArg (COMMA returnArg)*;
@@ -259,6 +266,7 @@ expr: LBRACKET expr RBRACKET |
 	expr update |
 	expr subsequence |
 	matchExpr |
+	variable DOT DATATYPE_RULE_NAME QUESTION_MARK |
 	DATATYPE_RULE_NAME (LBRACKET exprList RBRACKET)?;
 
 exprList: expr (COMMA expr)*;
