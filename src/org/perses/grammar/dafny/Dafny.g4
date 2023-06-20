@@ -2,6 +2,7 @@ grammar Dafny;
 
 DATATYPE: 'datatype';
 METHOD: 'method';
+FUNCTION: 'function';
 MAIN: 'Main';
 
 LBRACKET: '(';
@@ -12,7 +13,7 @@ EXPECT: 'expect';
 REQUIRES: 'requires';
 ENSURES: 'ensures';
 MODIFIES: 'modifies';
-
+READS: 'reads';
 RETURNS: 'returns';
 RETURN: 'return';
 
@@ -136,7 +137,11 @@ DATATYPE_RULE_FIELD_NAME: 'DT_'
 	'_'
 	('A'..'Z' | 'a'..'z' | DIGIT)*;
 
-METHOD_NAME: 'a'..'z' ('A'..'Z' |
+METHOD_NAME: ('m_' | 'safe_') ('A'..'Z' |
+	'a'..'z' |
+	'_' |
+	DIGIT)*;
+FUNCTION_NAME: 'f_' ('A'..'Z' |
 	'a'..'z' |
 	'_' |
 	DIGIT)*;
@@ -190,7 +195,7 @@ WS: [ \t\n\r]+ -> skip ;
 ERROR: .;
 
 translation_unit: program;
-program: datatype* method* main;
+program: datatype* method* function* main;
 
 datatype: DATATYPE DATATYPE_NAME (LANGLE typeList RANGLE)? EQUAL datatypeRuleList;
 datatypeRuleList: datatypeRule (BAR datatypeRule)*;
@@ -201,6 +206,7 @@ dataTypeField: DATATYPE_RULE_FIELD_NAME COLON dafnyType;
 main: METHOD MAIN LBRACKET RBRACKET RETURNS LBRACKET RBRACKET LCURLY stat* RCURLY;
 
 method: METHOD METHOD_NAME LBRACKET paramList? RBRACKET (RETURNS LBRACKET returnList? RBRACKET)? requires* ensures* modifies* LCURLY stat* RCURLY;
+function: FUNCTION FUNCTION_NAME LBRACKET paramList? RBRACKET (COLON LBRACKET returnList? RBRACKET)? requires* ensures* reads* LCURLY stat* expr RCURLY;
 
 dafnyType: baseType |
 	collectionType (LANGLE typeList RANGLE)? | LBRACKET typeList RBRACKET | DATATYPE_NAME (LANGLE typeList RANGLE)? | GENERIC_NAME ;
@@ -232,6 +238,7 @@ expectStat: EXPECT expr SEMICOLON;
 ensures: ENSURES expr SEMICOLON;
 requires: REQUIRES expr SEMICOLON;
 modifies: MODIFIES variableList SEMICOLON;
+reads: READS variableList SEMICOLON;
 returnStat: RETURN exprList? SEMICOLON;
 matchStat: MATCH expr LCURLY matchStatCase+ RCURLY;
 whileStat: WHILE expr decreasesClause? (invariantsClause SEMICOLON)? LCURLY stat* RCURLY;
@@ -255,9 +262,9 @@ variableArg: expr (COLON dafnyType)?;
 expr: LBRACKET expr RBRACKET |
 	literal |
 	variable |
-	expr DOT (KEYS | VALUES | LENGTH | FLOOR | intLiteral | DATATYPE_RULE_FIELD_NAME) |
+	expr DOT (KEYS | VALUES | LENGTH | FLOOR | intLiteral | DATATYPE_RULE_FIELD_NAME | (DATATYPE_RULE_NAME QUESTION_MARK)) |
 	expr (DOT intLiteral)+ |
-	expr binaryOperator expr |
+	expr binaryOperator (expr) |
 	unaryOperator expr |
 	BAR expr BAR |
 	callExpr |
@@ -266,7 +273,7 @@ expr: LBRACKET expr RBRACKET |
 	expr update |
 	expr subsequence |
 	matchExpr |
-	variable DOT DATATYPE_RULE_NAME QUESTION_MARK |
+	variable DOT  |
 	DATATYPE_RULE_NAME (LBRACKET exprList RBRACKET)?;
 
 exprList: expr (COMMA expr)*;
@@ -332,7 +339,7 @@ op7: MULT |
 unaryOperator: MINUS |
 	NOT;
 
-callExpr: METHOD_NAME LBRACKET exprList? RBRACKET;
+callExpr: (METHOD_NAME | FUNCTION_NAME) LBRACKET exprList? RBRACKET;
 
 ifElseExpr: IF expr THEN expr ELSE expr;
 
